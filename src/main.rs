@@ -29,7 +29,7 @@ fn main() {
     let event_loop_proxy: EventLoopProxy<server::Message> = event_loop.create_proxy();
     let window = WindowBuilder::new()
         .with_fullscreen(Some(winit::window::Fullscreen::Borderless(event_loop.available_monitors().last())))
-        .with_always_on_top(true)
+        // .with_always_on_top(true)
         .build(&event_loop)
         .unwrap();
 
