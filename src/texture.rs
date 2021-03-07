@@ -1,5 +1,5 @@
 use crate::image::{ColourType, ImageData};
-use anyhow::Result;
+use anyhow::*;
 use image::GenericImageView;
 
 pub struct Texture {
@@ -14,11 +14,12 @@ impl Texture {
         queue: &wgpu::Queue,
         data: &ImageData,
         label: &str,
-    ) -> Option<Self> {
+    ) -> Result<Self> {
         match data.colour_type {
             ColourType::GreyScale => {
                 let img =
-                    image::ImageBuffer::from_vec(data.size.0, data.size.1, data.bytes.clone())?;
+                    image::ImageBuffer::from_vec(data.size.0, data.size.1, data.bytes.clone())
+                        .ok_or(anyhow!("Couldn't create a greyscale image buffer"))?;
                 Self::from_image(
                     device,
                     queue,
@@ -28,7 +29,8 @@ impl Texture {
             }
             ColourType::RGB => {
                 let img =
-                    image::ImageBuffer::from_vec(data.size.0, data.size.1, data.bytes.clone())?;
+                    image::ImageBuffer::from_vec(data.size.0, data.size.1, data.bytes.clone())
+                        .ok_or(anyhow!("Couldn't create an rgb image buffer"))?;
                 Self::from_image(
                     device,
                     queue,
@@ -38,14 +40,13 @@ impl Texture {
             }
         }
     }
-
     pub fn from_bytes(
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         bytes: &[u8],
         label: &str,
-    ) -> Option<Self> {
-        let img = image::load_from_memory(bytes).ok()?;
+    ) -> Result<Self> {
+        let img = image::load_from_memory(bytes)?;
         Self::from_image(device, queue, &img, Some(label))
     }
 
@@ -54,7 +55,7 @@ impl Texture {
         queue: &wgpu::Queue,
         img: &image::DynamicImage,
         label: Option<&str>,
-    ) -> Option<Self> {
+    ) -> Result<Self> {
         let rgba = img.to_rgba8();
         let dimensions = img.dimensions();
 
@@ -99,7 +100,7 @@ impl Texture {
             ..Default::default()
         });
 
-        Some(Self {
+        Ok(Self {
             texture,
             view,
             sampler,

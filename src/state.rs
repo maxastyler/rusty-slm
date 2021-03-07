@@ -1,8 +1,6 @@
 use crate::image::{ColourType, ImageData};
 use crate::texture;
 use crate::vertex::Vertex;
-use anyhow::anyhow;
-use std::error::Error;
 use wgpu::util::DeviceExt;
 use winit::event::WindowEvent;
 use winit::window::Window;
@@ -240,8 +238,8 @@ impl State {
 
     pub fn set_image(&mut self, image: ImageData) -> anyhow::Result<()> {
         let diffuse_texture =
-            crate::texture::Texture::from_image_data(&self.device, &self.queue, &image, "image")
-                .ok_or(anyhow!("Couldn't create an image from the data"))?;
+            crate::texture::Texture::from_image_data(&self.device, &self.queue, &image, "image")?;
+
         let diffuse_bind_group = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &self.texture_bind_group_layout,
             entries: &[
