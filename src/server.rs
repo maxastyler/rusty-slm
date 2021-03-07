@@ -8,7 +8,6 @@ use tokio::sync::mpsc;
 use tonic::{Request, Status, Streaming};
 use winit::monitor::MonitorHandle;
 
-
 #[derive(Debug)]
 pub struct SlmService {
     pub screens: Vec<MonitorHandle>,
@@ -18,6 +17,7 @@ pub struct SlmService {
 #[derive(Clone)]
 pub enum Message {
     SetImage(image::ImageData),
+    SetScreen(MonitorHandle),
 }
 
 #[tonic::async_trait]
@@ -45,11 +45,6 @@ impl Slm for SlmService {
                 })) => {
                     image_data.size.0 = width;
                     image_data.size.1 = height;
-                    println!("{:?}", ColourType::Grey8 as i32);
-                    match 3 {
-                        x if x == (3.0 as u32) => 2,
-                        _ => 3,
-                    };
                     image_data.colour_type = match colour_type {
                         x if x == ColourType::Grey8 as i32 => image::ColourType::GreyScale,
                         _ => image::ColourType::RGB,
@@ -61,7 +56,9 @@ impl Slm for SlmService {
         }
         image_data.bytes = image_bytes;
         if let Err(_) = self.tx.send(Message::SetImage(image_data)).await {
-            return Err(tonic::Status::aborted("Couldn't send image data to main thread"))
+            return Err(tonic::Status::aborted(
+                "Couldn't send image data to main thread",
+            ));
         };
         Ok(tonic::Response::new(Response {
             completed: true,
@@ -72,7 +69,23 @@ impl Slm for SlmService {
         &self,
         request: Request<Screen>,
     ) -> Result<tonic::Response<Response>, Status> {
-        unimplemented!();
+        if let Some(monitor_handle) = self.screens.get(request.into_inner().screen as usize) {
+            if let Err(_) = self
+                .tx
+                .send(Message::SetScreen(monitor_handle.clone()))
+                .await
+            {
+                return Err(tonic::Status::aborted(
+                    "Couldn't send message through channel",
+                ));
+            }
+            Ok(tonic::Response::new(Response {
+                completed: true,
+                error: "".to_string(),
+            }))
+        } else {
+            return Err(tonic::Status::aborted("Couldn't get screen"));
+        }
     }
     async fn set_position(
         &self,

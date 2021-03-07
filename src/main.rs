@@ -28,7 +28,8 @@ fn main() {
     let event_loop: EventLoop<server::Message> = EventLoop::with_user_event();
     let event_loop_proxy: EventLoopProxy<server::Message> = event_loop.create_proxy();
     let window = WindowBuilder::new()
-        // .with_fullscreen(Some(winit::window::Fullscreen::Borderless(None)))
+        .with_fullscreen(Some(winit::window::Fullscreen::Borderless(event_loop.available_monitors().last())))
+        .with_always_on_top(true)
         .build(&event_loop)
         .unwrap();
 
@@ -67,6 +68,9 @@ fn main() {
         Event::UserEvent(server::Message::SetImage(im)) => {
             state.set_image(im);
         }
+        Event::UserEvent(server::Message::SetScreen(monitor_handle)) => window.set_fullscreen(
+            Some(winit::window::Fullscreen::Borderless(Some(monitor_handle))),
+        ),
         Event::RedrawRequested(_) => {
             state.update();
             match state.render() {
