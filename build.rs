@@ -76,5 +76,8 @@ fn main() -> Result<()> {
         write(shader.spv_path, compiled.as_binary_u8())?;
     }
 
+    tonic_build::compile_protos("protos/slm.proto")
+        .unwrap_or_else(|e| panic!("Failed to compile protos {:?}", e));
+
     Ok(())
 }

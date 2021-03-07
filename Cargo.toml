@@ -14,7 +14,17 @@ env_logger = "0.7"
 anyhow = "1.0"
 wgpu = "0.7"
 image = "0.23"
+# futures = "0.3"
+tonic = "0.4"
+prost = "0.7"
+futures-core = "0.3"
+futures-util = "0.3"
 futures = "0.3"
+async-stream = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = "0.8"
+tokio = { version = "1.2", features = ["rt-multi-thread", "macros", "sync", "time"] }
 bytemuck = {version = "1.5", features = [ "derive" ]}
 
 [build-dependencies]
@@ -22,3 +32,4 @@ shaderc = "0.7"
 anyhow = "1.0"
 fs_extra = "1.2"
 glob = "0.3"
+tonic-build = "0.4"
