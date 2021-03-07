@@ -51,12 +51,6 @@ fn main() {
             if !state.input(event) {
                 match event {
                     WindowEvent::Resized(physical_size) => {
-                        state.set_image(ImageData {
-                            colour_type: ColourType::RGB,
-                            bytes: vec![255, 0, 255],
-                            size: (1, 1),
-                            offset: None,
-                        });
                         state.resize(*physical_size);
                     }
                     WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
