@@ -34,7 +34,7 @@ fn main() {
         .unwrap();
 
     let mut state = block_on(State::new(&window));
-    let (tx, mut rx) = mpsc::channel(10);
+    let (tx, mut rx) = mpsc::channel(100);
     let mut server = server::SlmService {
         screens: window.available_monitors().collect(),
         tx,
