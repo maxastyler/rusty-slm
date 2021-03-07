@@ -5,20 +5,14 @@ use winit::{
     window::WindowBuilder,
 };
 
+mod image;
 mod state;
 mod texture;
 mod vertex;
-mod image;
 
+use crate::image::{ColourType, ImageData};
 use state::State;
 use vertex::Vertex;
-
-const VERTICES: &[Vertex] = &[
-    Vertex { position: [0.0, 0.0, 0.0], tex_coords: [0.0, 0.0]},
-    Vertex { position: [1.0, 0.0, 0.0], tex_coords: [1.0, 0.0]},
-    Vertex { position: [1.0, 1.0, 0.0], tex_coords: [1.0, 1.0]},
-    Vertex { position: [0.0, 1.0, 0.0], tex_coords: [0.0, 1.0]},
-];
 
 const INDICES: &[u16] = &[0, 1, 2, 0, 2, 3];
 
@@ -56,7 +50,15 @@ fn main() {
         } if window_id == window.id() => {
             if !state.input(event) {
                 match event {
-                    WindowEvent::Resized(physical_size) => state.resize(*physical_size),
+                    WindowEvent::Resized(physical_size) => {
+                        state.set_image(ImageData {
+                            colour_type: ColourType::RGB,
+                            bytes: vec![255, 0, 255],
+                            size: (1, 1),
+                            offset: None,
+                        });
+                        state.resize(*physical_size);
+                    }
                     WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                         state.resize(**new_inner_size);
                     }
@@ -67,6 +69,18 @@ fn main() {
                             virtual_keycode: Some(VirtualKeyCode::Escape),
                             ..
                         } => *control_flow = ControlFlow::Exit,
+                        KeyboardInput {
+                            state: ElementState::Pressed,
+                            virtual_keycode: Some(VirtualKeyCode::Space),
+                            ..
+                        } => {
+                            state.set_image(ImageData {
+                                colour_type: ColourType::RGB,
+                                bytes: vec![255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255],
+                                size: (2, 2),
+                                offset: None,
+                            });
+                        }
                         _ => {}
                     },
                     _ => {}

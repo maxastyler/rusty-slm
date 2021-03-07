@@ -1,6 +1,8 @@
-use crate::image::ImageData;
+use crate::image::{ColourType, ImageData};
 use crate::texture;
 use crate::vertex::Vertex;
+use anyhow::anyhow;
+use std::error::Error;
 use wgpu::util::DeviceExt;
 use winit::event::WindowEvent;
 use winit::window::Window;
@@ -19,6 +21,7 @@ pub struct State {
     pub num_indices: u32,
     pub diffuse_bind_group: wgpu::BindGroup,
     pub diffuse_texture: texture::Texture,
+    pub texture_bind_group_layout: wgpu::BindGroupLayout,
     pub image: ImageData,
 }
 
@@ -59,9 +62,14 @@ impl State {
         let swap_chain = device.create_swap_chain(&surface, &sc_desc);
 
         // let diffuse_bytes = include_bytes!("happy-tree.png");
-        let diffuse_bytes = b"\x02\x03\x04\xFF";
+        let initial_image = ImageData {
+            colour_type: ColourType::GreyScale,
+            size: (1, 1),
+            bytes: vec![0],
+            offset: None,
+        };
         let diffuse_texture =
-            crate::texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "happy-tree.png")
+            crate::texture::Texture::from_image_data(&device, &queue, &initial_image, "image")
                 .unwrap();
 
         let texture_bind_group_layout =
@@ -122,11 +130,9 @@ impl State {
                 buffers: &[Vertex::desc()],
             },
             fragment: Some(wgpu::FragmentState {
-                // 3.
                 module: &fs_module,
                 entry_point: "main",
                 targets: &[wgpu::ColorTargetState {
-                    // 4.
                     format: sc_desc.format,
                     alpha_blend: wgpu::BlendState::REPLACE,
                     color_blend: wgpu::BlendState::REPLACE,
@@ -134,23 +140,23 @@ impl State {
                 }],
             }),
             primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleList, // 1.
+                topology: wgpu::PrimitiveTopology::TriangleList,
                 strip_index_format: None,
-                front_face: wgpu::FrontFace::Ccw, // 2.
+                front_face: wgpu::FrontFace::Ccw,
                 cull_mode: wgpu::CullMode::Back,
                 // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
                 polygon_mode: wgpu::PolygonMode::Fill,
             },
-            depth_stencil: None, // 1.
+            depth_stencil: None,
             multisample: wgpu::MultisampleState {
-                count: 1,                         // 2.
-                mask: !0,                         // 3.
-                alpha_to_coverage_enabled: false, // 4.
+                count: 1,
+                mask: !0,
+                alpha_to_coverage_enabled: false,
             },
         });
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(crate::VERTICES),
+            contents: bytemuck::cast_slice(&create_vertices_for_image(size, &initial_image)),
             usage: wgpu::BufferUsage::VERTEX,
         });
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -174,10 +180,8 @@ impl State {
             num_indices,
             diffuse_bind_group: diffuse_bind_group,
             diffuse_texture: diffuse_texture,
-            image: ImageData {
-                size: (0, 0),
-                bytes: vec![],
-            },
+            texture_bind_group_layout: texture_bind_group_layout,
+            image: initial_image,
         }
     }
 
@@ -186,6 +190,7 @@ impl State {
         self.sc_desc.width = new_size.width;
         self.sc_desc.height = new_size.height;
         self.swap_chain = self.device.create_swap_chain(&self.surface, &self.sc_desc);
+        self.set_new_texture_size();
     }
 
     pub fn input(&mut self, event: &WindowEvent) -> bool {
@@ -234,6 +239,67 @@ impl State {
     }
 
     pub fn set_image(&mut self, image: ImageData) -> anyhow::Result<()> {
+        let diffuse_texture =
+            crate::texture::Texture::from_image_data(&self.device, &self.queue, &image, "image")
+                .ok_or(anyhow!("Couldn't create an image from the data"))?;
+        let diffuse_bind_group = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &self.texture_bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
+                },
+            ],
+            label: Some("diffuse_bind_group"),
+        });
+
+        self.diffuse_texture = diffuse_texture;
+        self.diffuse_bind_group = diffuse_bind_group;
+        self.image = image;
+        self.set_new_texture_size();
         Ok(())
     }
+    pub fn set_new_texture_size(&mut self) {
+        self.vertex_buffer = self
+            .device
+            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: bytemuck::cast_slice(&create_vertices_for_image(self.size, &self.image)),
+                usage: wgpu::BufferUsage::VERTEX,
+            });
+    }
+}
+
+/// Creates a vector of vertices which display the image at the correct size on the given display
+/// offset should be in pixels, and it gives the image an offset on the screen
+fn create_vertices_for_image(
+    window_size: winit::dpi::PhysicalSize<u32>,
+    image_data: &ImageData,
+) -> Vec<Vertex> {
+    let w = 2.0 * (image_data.size.0 as f32 / window_size.width as f32);
+    let h = 2.0 * (image_data.size.1 as f32 / window_size.height as f32);
+    let (x0, y1) = (-1.0, 1.0);
+    let (x1, y0) = (x0 + w, y1 - h);
+    vec![
+        Vertex {
+            position: [x0, y0, 0.0],
+            tex_coords: [0.0, 0.0],
+        },
+        Vertex {
+            position: [x1, y0, 0.0],
+            tex_coords: [1.0, 0.0],
+        },
+        Vertex {
+            position: [x1, y1, 0.0],
+            tex_coords: [1.0, 1.0],
+        },
+        Vertex {
+            position: [x0, y1, 0.0],
+            tex_coords: [0.0, 1.0],
+        },
+    ]
 }

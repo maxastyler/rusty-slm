@@ -1,4 +1,4 @@
-use crate::image::ImageData;
+use crate::image::{ColourType, ImageData};
 use anyhow::Result;
 use image::GenericImageView;
 
@@ -14,31 +14,39 @@ impl Texture {
         queue: &wgpu::Queue,
         data: &ImageData,
         label: &str,
-    ) -> Result<Self> {
-        // let im_vec = bytes.iter().cloned().collect();
-        let img = image::ImageBuffer::from_vec(data.size.0, data.size.1, data.bytes.clone()).unwrap();
-        Self::from_image(
-            device,
-            queue,
-            &image::DynamicImage::ImageLuma8(img),
-            Some(label),
-        )
+    ) -> Option<Self> {
+        match data.colour_type {
+            ColourType::GreyScale => {
+                let img =
+                    image::ImageBuffer::from_vec(data.size.0, data.size.1, data.bytes.clone())?;
+                Self::from_image(
+                    device,
+                    queue,
+                    &image::DynamicImage::ImageLuma8(img),
+                    Some(label),
+                )
+            }
+            ColourType::RGB => {
+                let img =
+                    image::ImageBuffer::from_vec(data.size.0, data.size.1, data.bytes.clone())?;
+                Self::from_image(
+                    device,
+                    queue,
+                    &image::DynamicImage::ImageRgb8(img),
+                    Some(label),
+                )
+            }
+        }
     }
+
     pub fn from_bytes(
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         bytes: &[u8],
         label: &str,
-    ) -> Result<Self> {
-        // let img = image::load_from_memory(bytes)?;
-        let im_vec = bytes.iter().cloned().collect();
-        let img = image::ImageBuffer::from_vec(2, 2, im_vec).unwrap();
-        Self::from_image(
-            device,
-            queue,
-            &image::DynamicImage::ImageLuma8(img),
-            Some(label),
-        )
+    ) -> Option<Self> {
+        let img = image::load_from_memory(bytes).ok()?;
+        Self::from_image(device, queue, &img, Some(label))
     }
 
     pub fn from_image(
@@ -46,7 +54,7 @@ impl Texture {
         queue: &wgpu::Queue,
         img: &image::DynamicImage,
         label: Option<&str>,
-    ) -> Result<Self> {
+    ) -> Option<Self> {
         let rgba = img.to_rgba8();
         let dimensions = img.dimensions();
 
@@ -91,7 +99,7 @@ impl Texture {
             ..Default::default()
         });
 
-        Ok(Self {
+        Some(Self {
             texture,
             view,
             sampler,
