@@ -53,12 +53,20 @@ fn main() {
         )
         .get_matches();
 
+    let icon = winit::window::Icon::from_rgba(
+        include_bytes!("data/icon").iter().cloned().collect(),
+        100,
+        100,
+    )
+    .ok();
+
     let port: u16 = matches.value_of("PORT").unwrap().parse().unwrap();
 
     let event_loop: EventLoop<server::Message> = EventLoop::with_user_event();
     let event_loop_proxy: EventLoopProxy<server::Message> = event_loop.create_proxy();
     let window = WindowBuilder::new()
         .with_title("SLM")
+        .with_window_icon(icon)
         .build(&event_loop)
         .unwrap();
 
