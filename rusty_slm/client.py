@@ -32,6 +32,10 @@ class SLMController():
     def set_screen(self, screen):
         """Set the screen of the SLM
         """
+        print("Getting channel")
         with grpc.insecure_channel(f"{self.address}:{self.port}") as channel:
+            print("Creating stub")
             stub = slm_pb2_grpc.SLMStub(channel)
+            print("Setting the screen")
             stub.SetScreen(slm_pb2.Screen(screen = screen))
+            print("Done that")
