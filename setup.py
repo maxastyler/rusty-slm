@@ -7,6 +7,6 @@ setup(
     author='Max Tyler',
     author_email='maxastyler@gmail.com',
     description='Functions to interact with an SLM',
-    packages=find_packages(include=["slmmm"]),
+    packages=find_packages(include=["rusty-slm"]),
     install_requires=["grpcio>=1.35", "grpcio-tools>=1.35"]
 )
