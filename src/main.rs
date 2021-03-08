@@ -84,7 +84,7 @@ fn main() {
     }
 
     let mut state = block_on(State::new(&window));
-    let (tx, mut rx) = mpsc::channel(4);
+    let (tx, mut rx) = mpsc::channel(100);
     let cloned_tx = tx.clone();
     let server = server::SlmService { tx };
 
@@ -92,7 +92,7 @@ fn main() {
     // spawn the service thread
     let server_thread = thread::spawn(move || {
         tokio::runtime::Builder::new_multi_thread()
-            .worker_threads(4)
+            .worker_threads(10)
             .enable_all()
             .build()
             .unwrap()
