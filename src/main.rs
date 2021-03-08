@@ -167,5 +167,6 @@ fn set_window_monitor(window: &Window, port: u16, monitor_handle: MonitorHandle)
     if let Some(name) = monitor_handle.name() {
         window.set_title(&format!("SLM display: {}; port: {}", &name, port));
     }
+    window.set_fullscreen(None);
     window.set_fullscreen(Some(Fullscreen::Borderless(Some(monitor_handle))));
 }
