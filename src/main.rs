@@ -53,6 +53,8 @@ fn main() {
         )
         .get_matches();
 
+    let port: u16 = matches.value_of("PORT").unwrap().parse().unwrap();
+
     let event_loop: EventLoop<server::Message> = EventLoop::with_user_event();
     let event_loop_proxy: EventLoopProxy<server::Message> = event_loop.create_proxy();
     let window = WindowBuilder::new()
@@ -64,9 +66,13 @@ fn main() {
         .available_monitors()
         .find(|m| m.name() == matches.value_of("monitor").map(|x| x.to_owned()))
     {
-        set_window_monitor(&window, &m);
+        set_window_monitor(&window, port, &m);
     } else {
-        set_window_monitor(&window, &event_loop.available_monitors().last().unwrap());
+        set_window_monitor(
+            &window,
+            port,
+            &event_loop.available_monitors().last().unwrap(),
+        );
     }
 
     let mut state = block_on(State::new(&window));
@@ -87,7 +93,7 @@ fn main() {
             .unwrap()
             .block_on(Server::builder().add_service(svc).serve(SocketAddr::new(
                 IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
-                matches.value_of("PORT").unwrap().parse().unwrap(),
+                port,
             )));
         block_on(cloned_tx.send(server::Message::Quit));
     });
@@ -107,9 +113,9 @@ fn main() {
         Event::UserEvent(server::Message::SetImage(im)) => {
             state.set_image(im).unwrap();
         }
-        Event::UserEvent(server::Message::SetScreen(monitor_handle)) => window.set_fullscreen(
-            Some(winit::window::Fullscreen::Borderless(Some(monitor_handle))),
-        ),
+        Event::UserEvent(server::Message::SetScreen(monitor_handle)) => {
+            set_window_monitor(&window, port, &monitor_handle)
+        }
         Event::UserEvent(server::Message::Quit) => *control_flow = ControlFlow::Exit,
         Event::RedrawRequested(_) => {
             state.update();
@@ -150,9 +156,9 @@ fn main() {
 }
 
 /// set the window fullscreen on the given monitor
-fn set_window_monitor(window: &Window, monitor_handle: &MonitorHandle) {
+fn set_window_monitor(window: &Window, port: u16, monitor_handle: &MonitorHandle) {
     window.set_fullscreen(Some(Fullscreen::Borderless(Some(monitor_handle.clone()))));
     if let Some(name) = monitor_handle.name() {
-        window.set_title(&format!("SLM on: {}", &name));
+        window.set_title(&format!("SLM display: {}; port: {}", &name, port));
     }
 }
