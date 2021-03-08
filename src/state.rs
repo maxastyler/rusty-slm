@@ -191,7 +191,7 @@ impl State {
         self.set_new_texture_size();
     }
 
-    pub fn input(&mut self, event: &WindowEvent) -> bool {
+    pub fn input(&mut self, _event: &WindowEvent) -> bool {
         false
     }
 
@@ -236,6 +236,7 @@ impl State {
         Ok(())
     }
 
+    /// Try to set an image from given `ImageData`
     pub fn set_image(&mut self, image: ImageData) -> anyhow::Result<()> {
         let diffuse_texture =
             crate::texture::Texture::from_image_data(&self.device, &self.queue, &image, "image")?;
@@ -261,6 +262,8 @@ impl State {
         self.set_new_texture_size();
         Ok(())
     }
+
+    /// Set the new texture size. This is useful if the screen size or the texture size has changed
     pub fn set_new_texture_size(&mut self) {
         self.vertex_buffer = self
             .device

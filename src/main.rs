@@ -1,10 +1,13 @@
+use clap::{App, Arg};
 use futures::executor::block_on;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::thread;
 use tokio::sync::mpsc;
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop, EventLoopProxy},
-    window::WindowBuilder,
+    monitor::MonitorHandle,
+    window::{Fullscreen, Window, WindowBuilder},
 };
 
 mod image;
@@ -16,7 +19,6 @@ mod slm {
     tonic::include_proto!("slm");
 }
 
-use crate::image::{ColourType, ImageData};
 use crate::slm::slm_server::SlmServer;
 use state::State;
 use tonic::transport::Server;
@@ -24,41 +26,78 @@ use tonic::transport::Server;
 const INDICES: &[u16] = &[0, 1, 2, 0, 2, 3];
 
 fn main() {
-    env_logger::init();
+    let matches = App::new("SLM Server")
+        .version("0.1.0")
+        .author("Max Tyler <maxastyler@gmail.com>")
+        .about("A server with associated fullscreen window for displaying patterns on an SLM")
+        .arg(
+            Arg::with_name("PORT")
+                .help("The port for the server to run on")
+                .required(true)
+                .index(1)
+                .validator(|v| {
+                    if let Ok(_) = v.parse::<u32>() {
+                        Ok(())
+                    } else {
+                        Err(format!("{} could not be parsed as a u32", v))
+                    }
+                }),
+        )
+        .arg(
+            Arg::with_name("monitor")
+                .short("m")
+                .help("The name of the monitor to display the server on")
+                .takes_value(true)
+                .value_name("monitor")
+                .default_value(""),
+        )
+        .get_matches();
+
     let event_loop: EventLoop<server::Message> = EventLoop::with_user_event();
     let event_loop_proxy: EventLoopProxy<server::Message> = event_loop.create_proxy();
     let window = WindowBuilder::new()
-        .with_fullscreen(Some(winit::window::Fullscreen::Borderless(event_loop.available_monitors().last())))
-        // .with_always_on_top(true)
+        .with_title("SLM")
         .build(&event_loop)
         .unwrap();
 
+    if let Some(m) = event_loop
+        .available_monitors()
+        .find(|m| m.name() == matches.value_of("monitor").map(|x| x.to_owned()))
+    {
+        set_window_monitor(&window, &m);
+    } else {
+        set_window_monitor(&window, &event_loop.available_monitors().last().unwrap());
+    }
+
     let mut state = block_on(State::new(&window));
-    let (tx, mut rx) = mpsc::channel(100);
-    let mut server = server::SlmService {
+    let (tx, mut rx) = mpsc::channel(4);
+    let cloned_tx = tx.clone();
+    let server = server::SlmService {
         screens: window.available_monitors().collect(),
         tx,
     };
 
     let svc = SlmServer::new(server);
     // spawn the service thread
-    thread::spawn(move || {
+    let server_thread = thread::spawn(move || {
         tokio::runtime::Builder::new_multi_thread()
-            .worker_threads(2)
+            .worker_threads(4)
             .enable_all()
             .build()
             .unwrap()
-            .block_on(
-                Server::builder()
-                    .add_service(svc)
-                    .serve("[::1]:10000".parse().unwrap()),
-            );
+            .block_on(Server::builder().add_service(svc).serve(SocketAddr::new(
+                IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
+                matches.value_of("PORT").unwrap().parse().unwrap(),
+            )));
+        block_on(cloned_tx.send(server::Message::Quit));
     });
     // spawn the message thread
-    thread::spawn(move || loop {
+    let message_thread = thread::spawn(move || loop {
         match rx.blocking_recv() {
             Some(message) => {
-                event_loop_proxy.send_event(message);
+                if let Err(_) = event_loop_proxy.send_event(message) {
+                    break;
+                };
             }
             None => break,
         }
@@ -66,11 +105,12 @@ fn main() {
 
     event_loop.run(move |event, _, control_flow| match event {
         Event::UserEvent(server::Message::SetImage(im)) => {
-            state.set_image(im);
+            state.set_image(im).unwrap();
         }
         Event::UserEvent(server::Message::SetScreen(monitor_handle)) => window.set_fullscreen(
             Some(winit::window::Fullscreen::Borderless(Some(monitor_handle))),
         ),
+        Event::UserEvent(server::Message::Quit) => *control_flow = ControlFlow::Exit,
         Event::RedrawRequested(_) => {
             state.update();
             match state.render() {
@@ -80,7 +120,7 @@ fn main() {
                 // The system is out of memory, we should probably quit
                 Err(wgpu::SwapChainError::OutOfMemory) => *control_flow = ControlFlow::Exit,
                 // All other errors (Outdated, Timeout) should be resolved by the next frame
-                Err(e) => eprintln!("{:?}", e),
+                Err(_) => {}
             }
         }
         Event::MainEventsCleared => {
@@ -101,30 +141,18 @@ fn main() {
                         state.resize(**new_inner_size);
                     }
                     WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-                    WindowEvent::KeyboardInput { input, .. } => match input {
-                        KeyboardInput {
-                            state: ElementState::Pressed,
-                            virtual_keycode: Some(VirtualKeyCode::Escape),
-                            ..
-                        } => *control_flow = ControlFlow::Exit,
-                        KeyboardInput {
-                            state: ElementState::Pressed,
-                            virtual_keycode: Some(VirtualKeyCode::Space),
-                            ..
-                        } => {
-                            state.set_image(ImageData {
-                                colour_type: ColourType::RGB,
-                                bytes: vec![255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255],
-                                size: (2, 2),
-                                offset: None,
-                            });
-                        }
-                        _ => {}
-                    },
                     _ => {}
                 }
             }
         }
         _ => {}
     });
+}
+
+/// set the window fullscreen on the given monitor
+fn set_window_monitor(window: &Window, monitor_handle: &MonitorHandle) {
+    window.set_fullscreen(Some(Fullscreen::Borderless(Some(monitor_handle.clone()))));
+    if let Some(name) = monitor_handle.name() {
+        window.set_title(&format!("SLM on: {}", &name));
+    }
 }

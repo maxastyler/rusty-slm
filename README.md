@@ -6,4 +6,4 @@ This is a program for controlling SLMs with rust and python. The server is imple
 
 - Implement a function to return a full list of monitors, and their properties
 - Check if fullscreen borderless is the best option for fullscreening the display
-- Add arguments to the main function (setting the monitor, port, etc...)
+- Option to set a monitor by name, rather than number

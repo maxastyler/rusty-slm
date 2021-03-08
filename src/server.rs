@@ -18,6 +18,7 @@ pub struct SlmService {
 pub enum Message {
     SetImage(image::ImageData),
     SetScreen(MonitorHandle),
+    Quit,
 }
 
 #[tonic::async_trait]
