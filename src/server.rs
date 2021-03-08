@@ -69,7 +69,7 @@ impl Slm for SlmService {
         &self,
         request: Request<Screen>,
     ) -> Result<tonic::Response<Response>, Status> {
-        println!("RUST: GOT MESSAGE")
+        println!("RUST: GOT MESSAGE");
         if let Err(_) = self
             .tx
             .send(Message::SetScreen(request.into_inner().screen as usize))
@@ -79,7 +79,7 @@ impl Slm for SlmService {
                 "Couldn't send message through channel",
             ));
         }
-        println!("RUST: SENDING RESPONSE")
+        println!("RUST: SENDING RESPONSE");
         Ok(tonic::Response::new(Response {
             completed: true,
             error: "".to_string(),
