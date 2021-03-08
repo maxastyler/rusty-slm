@@ -20,6 +20,14 @@ pkgs.mkShell rec {
     pkgs.xorg.libXcursor
     pkgs.xorg.libXrandr
     pkgs.xorg.libXext
+    ((pkgs.python3.withPackages (ps:
+      with ps; [
+        numpy
+        python-language-server
+        pyls-mypy
+        grpcio
+        grpcio-tools
+      ])).override (args: { ignoreCollisions = true; }))
   ];
   LD_LIBRARY_PATH = with pkgs; stdenv.lib.makeLibraryPath buildInputs;
 }
