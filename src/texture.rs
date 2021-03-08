@@ -18,7 +18,7 @@ impl Texture {
         match data.colour_type {
             ColourType::GreyScale => {
                 let img =
-                    image::ImageBuffer::from_vec(data.size.0, data.size.1, data.bytes.clone())
+                    image::ImageBuffer::from_vec(data.size.1, data.size.0, data.bytes.clone())
                         .ok_or(anyhow!("Couldn't create a greyscale image buffer"))?;
                 Self::from_image(
                     device,
@@ -29,7 +29,7 @@ impl Texture {
             }
             ColourType::RGB => {
                 let img =
-                    image::ImageBuffer::from_vec(data.size.0, data.size.1, data.bytes.clone())
+                    image::ImageBuffer::from_vec(data.size.1, data.size.0, data.bytes.clone())
                         .ok_or(anyhow!("Couldn't create an rgb image buffer"))?;
                 Self::from_image(
                     device,
