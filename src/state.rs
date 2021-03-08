@@ -59,7 +59,6 @@ impl State {
         };
         let swap_chain = device.create_swap_chain(&surface, &sc_desc);
 
-        // let diffuse_bytes = include_bytes!("happy-tree.png");
         let initial_image = ImageData {
             colour_type: ColourType::GreyScale,
             size: (1, 1),
