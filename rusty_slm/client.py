@@ -10,6 +10,7 @@ class SLMController():
         """Put an image on the SLM screen.
         Image can be either a 2-dimensional numpy array or a 3-dimensional numpy array of the shape 
         (W, H, 3)
+        It should be uint8 datatype.
         """
 
         width = image.shape[0]
