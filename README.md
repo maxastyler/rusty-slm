@@ -2,7 +2,11 @@
 
 This is a program for controlling SLMs with rust and python. The server is implemented in rust with grpc, allowing for control from any programming language that can connect to a web endpoint.
 
-## Server Installation
+## Binaries
+
+There's binaries in the releases section to download, which should run on windows and linux without extra stuff.
+
+## Server Compilation
 ### Windows
 For compiling on windows:
 1) Install rust (using [rustup](https://rustup.rs/). You'll probably need to install the msvc c++ build-tools as well)
