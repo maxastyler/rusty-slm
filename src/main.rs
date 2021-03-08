@@ -66,22 +66,19 @@ fn main() {
         .available_monitors()
         .find(|m| m.name() == matches.value_of("monitor").map(|x| x.to_owned()))
     {
-        set_window_monitor(&window, port, &m);
+        set_window_monitor(&window, port, m);
     } else {
         set_window_monitor(
             &window,
             port,
-            &event_loop.available_monitors().last().unwrap(),
+            event_loop.available_monitors().last().unwrap(),
         );
     }
 
     let mut state = block_on(State::new(&window));
     let (tx, mut rx) = mpsc::channel(4);
     let cloned_tx = tx.clone();
-    let server = server::SlmService {
-        screens: window.available_monitors().collect(),
-        tx,
-    };
+    let server = server::SlmService { tx };
 
     let svc = SlmServer::new(server);
     // spawn the service thread
@@ -113,8 +110,10 @@ fn main() {
         Event::UserEvent(server::Message::SetImage(im)) => {
             state.set_image(im).unwrap();
         }
-        Event::UserEvent(server::Message::SetScreen(monitor_handle)) => {
-            set_window_monitor(&window, port, &monitor_handle)
+        Event::UserEvent(server::Message::SetScreen(monitor)) => {
+            if let Some(monitor_handle) = window.available_monitors().nth(monitor) {
+                set_window_monitor(&window, port, monitor_handle)
+            }
         }
         Event::UserEvent(server::Message::Quit) => *control_flow = ControlFlow::Exit,
         Event::RedrawRequested(_) => {
@@ -156,9 +155,9 @@ fn main() {
 }
 
 /// set the window fullscreen on the given monitor
-fn set_window_monitor(window: &Window, port: u16, monitor_handle: &MonitorHandle) {
-    window.set_fullscreen(Some(Fullscreen::Borderless(Some(monitor_handle.clone()))));
+fn set_window_monitor(window: &Window, port: u16, monitor_handle: MonitorHandle) {
     if let Some(name) = monitor_handle.name() {
         window.set_title(&format!("SLM display: {}; port: {}", &name, port));
     }
+    window.set_fullscreen(Some(Fullscreen::Borderless(Some(monitor_handle))));
 }

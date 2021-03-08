@@ -10,14 +10,13 @@ use winit::monitor::MonitorHandle;
 
 #[derive(Debug)]
 pub struct SlmService {
-    pub screens: Vec<MonitorHandle>,
     pub tx: mpsc::Sender<Message>,
 }
 
 #[derive(Clone)]
 pub enum Message {
     SetImage(image::ImageData),
-    SetScreen(MonitorHandle),
+    SetScreen(usize),
     Quit,
 }
 
@@ -70,23 +69,19 @@ impl Slm for SlmService {
         &self,
         request: Request<Screen>,
     ) -> Result<tonic::Response<Response>, Status> {
-        if let Some(monitor_handle) = self.screens.get(request.into_inner().screen as usize) {
-            if let Err(_) = self
-                .tx
-                .send(Message::SetScreen(monitor_handle.clone()))
-                .await
-            {
-                return Err(tonic::Status::aborted(
-                    "Couldn't send message through channel",
-                ));
-            }
-            Ok(tonic::Response::new(Response {
-                completed: true,
-                error: "".to_string(),
-            }))
-        } else {
-            return Err(tonic::Status::aborted("Couldn't get screen"));
+        if let Err(_) = self
+            .tx
+            .send(Message::SetScreen(request.into_inner().screen as usize))
+            .await
+        {
+            return Err(tonic::Status::aborted(
+                "Couldn't send message through channel",
+            ));
         }
+        Ok(tonic::Response::new(Response {
+            completed: true,
+            error: "".to_string(),
+        }))
     }
     async fn set_position(
         &self,
