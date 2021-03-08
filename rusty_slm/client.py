@@ -3,7 +3,8 @@ from rusty_slm import slm_pb2_grpc
 import grpc
 
 class SLMController():
-    def __init__(self, port):
+    def __init__(self, port, address = "localhost"):
+        self.address = address
         self.port = port
 
     def set_image(self, image):
@@ -24,7 +25,13 @@ class SLMController():
 
         image_data = slm_pb2.ImageData(data = image.tobytes())
         
-        with grpc.insecure_channel(f"localhost:{self.port}") as channel:
+        with grpc.insecure_channel(f"{self.address}:{self.port}") as channel:
             stub = slm_pb2_grpc.SLMStub(channel)
-            stub.SetImage(iter([image_description, image_data]))
+            return stub.SetImage(iter([image_description, image_data]))
 
+    def set_screen(self, screen):
+        """Set the screen of the SLM
+        """
+        with grpc.insecure_channel(f"{self.address}:{self.port}") as channel:
+            stub = slm_pb2_grpc.SLMStub(channel)
+            return stub.SetScreen(slm_pb2.Screen(screen = screen))
