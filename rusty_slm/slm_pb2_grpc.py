@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import slm_pb2 as slm__pb2
+from rusty_slm import slm_pb2 as slm__pb2
 
 
 class SLMStub(object):
