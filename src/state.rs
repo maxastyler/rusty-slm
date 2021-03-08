@@ -288,19 +288,19 @@ fn create_vertices_for_image(
     vec![
         Vertex {
             position: [x0, y0, 0.0],
-            tex_coords: [0.0, 0.0],
-        },
-        Vertex {
-            position: [x1, y0, 0.0],
             tex_coords: [1.0, 0.0],
         },
         Vertex {
-            position: [x1, y1, 0.0],
+            position: [x1, y0, 0.0],
             tex_coords: [1.0, 1.0],
         },
         Vertex {
-            position: [x0, y1, 0.0],
+            position: [x1, y1, 0.0],
             tex_coords: [0.0, 1.0],
+        },
+        Vertex {
+            position: [x0, y1, 0.0],
+            tex_coords: [0.0, 0.0],
         },
     ]
 }
