@@ -6,6 +6,8 @@ class SLMController():
     def __init__(self, port, address = "localhost"):
         self.address = address
         self.port = port
+        self.channel = grpc.insecure_channel(f"{self.address}:{self.port}")
+        self.stub = slm_pb2_grpc.SLMStub(self.channel)
 
     def set_image(self, image):
         """Put an image on the SLM screen.
@@ -25,17 +27,10 @@ class SLMController():
 
         image_data = slm_pb2.ImageData(data = image.tobytes())
         
-        with grpc.insecure_channel(f"{self.address}:{self.port}") as channel:
-            stub = slm_pb2_grpc.SLMStub(channel)
-            stub.SetImage(iter([image_description, image_data]))
+        self.stub.SetImage(iter([image_description, image_data]))
 
     def set_screen(self, screen):
         """Set the screen of the SLM
         """
-        print("Getting channel")
-        with grpc.insecure_channel(f"{self.address}:{self.port}") as channel:
-            print("Creating stub")
-            stub = slm_pb2_grpc.SLMStub(channel)
-            print("Setting the screen")
-            stub.SetScreen(slm_pb2.Screen(screen = screen))
-            print("Done that")
+        self.stub.SetScreen(slm_pb2.Screen(screen = screen))
+        
