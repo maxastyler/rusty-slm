@@ -116,7 +116,7 @@ fn main() {
 
     event_loop.run(move |event, _, control_flow| match event {
         Event::UserEvent(server::Message::SetImage(im)) => {
-            state.set_image(im).unwrap();
+            state.set_image(im);
         }
         Event::UserEvent(server::Message::SetScreen(monitor)) => {
             if let Some(monitor_handle) = window.available_monitors().nth(monitor) {
