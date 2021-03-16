@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 use futures::executor::block_on;
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::net::{IpAddr, Ipv6Addr, SocketAddr};
 use std::thread;
 use tokio::sync::mpsc;
 use winit::{
@@ -97,7 +97,7 @@ fn main() {
             .build()
             .unwrap()
             .block_on(Server::builder().add_service(svc).serve(SocketAddr::new(
-                IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
+                "::1".parse().unwrap(),
                 port,
             )));
         block_on(cloned_tx.send(server::Message::Quit));
