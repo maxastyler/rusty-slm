@@ -97,7 +97,7 @@ fn main() {
             .build()
             .unwrap()
             .block_on(Server::builder().add_service(svc).serve(SocketAddr::new(
-                "::1".parse().unwrap(),
+                "::".parse().unwrap(),
                 port,
             )));
         block_on(cloned_tx.send(server::Message::Quit));
