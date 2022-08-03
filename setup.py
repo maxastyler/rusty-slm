@@ -8,5 +8,5 @@ setup(
     author_email="maxastyler@gmail.com",
     description="Functions to interact with an SLM",
     packages=find_packages(include=["rusty_slm"]),
-    install_requires=["grpcio==1.32", "grpcio-tools==1.32"],
+    install_requires=["grpcio==1.48", "grpcio-tools==1.48"],
 )
