@@ -25,6 +25,11 @@
               "rustfmt"
             ])
             rust-analyzer-nightly
+            pyright
+            poetry
+            (python39.withPackages (ps: with ps; [grpcio grpcio-tools]))
+            grpc
+            grpc-tools
           ];
         };
       });

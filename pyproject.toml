@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "rusty-slm"
+version = "0.1.0"
+description = "Functions to interact with an SLM"
+authors = ["maxastyler <maxastyler@gmail.com>"]
+license = "GPLv3"
+readme = "README.md"
+packages = [{include = "rusty_slm"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+grpcio = "^1.51.1"
+grpcio-tools = "^1.51.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
