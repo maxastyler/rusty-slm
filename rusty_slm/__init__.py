@@ -1,1 +1,1 @@
-from rusty_slm.client import SLMController
+from rusty_slm.client import SLMBinaryRunner, SLMClient, SLM

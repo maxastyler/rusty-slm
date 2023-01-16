@@ -26,6 +26,7 @@
             ])
             rust-analyzer-nightly
             pyright
+            black
             poetry
             grpc
             grpc-tools
