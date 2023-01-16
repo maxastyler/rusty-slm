@@ -27,10 +27,12 @@
             rust-analyzer-nightly
             pyright
             poetry
-            (python39.withPackages (ps: with ps; [grpcio grpcio-tools]))
             grpc
             grpc-tools
+            pkg-config
+
           ];
+          LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib";
         };
       });
 }

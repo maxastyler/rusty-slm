@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import slm_pb2 as slm__pb2
+from rusty_slm import slm_pb2 as rusty__slm_dot_slm__pb2
 
 
 class SLMStub(object):
@@ -16,18 +16,18 @@ class SLMStub(object):
         """
         self.SetImage = channel.stream_unary(
                 '/slm.SLM/SetImage',
-                request_serializer=slm__pb2.ImageData.SerializeToString,
-                response_deserializer=slm__pb2.Response.FromString,
+                request_serializer=rusty__slm_dot_slm__pb2.ImageData.SerializeToString,
+                response_deserializer=rusty__slm_dot_slm__pb2.Response.FromString,
                 )
         self.SetScreen = channel.unary_unary(
                 '/slm.SLM/SetScreen',
-                request_serializer=slm__pb2.Screen.SerializeToString,
-                response_deserializer=slm__pb2.Response.FromString,
+                request_serializer=rusty__slm_dot_slm__pb2.Screen.SerializeToString,
+                response_deserializer=rusty__slm_dot_slm__pb2.Response.FromString,
                 )
         self.SetPosition = channel.unary_unary(
                 '/slm.SLM/SetPosition',
-                request_serializer=slm__pb2.Position.SerializeToString,
-                response_deserializer=slm__pb2.Response.FromString,
+                request_serializer=rusty__slm_dot_slm__pb2.Position.SerializeToString,
+                response_deserializer=rusty__slm_dot_slm__pb2.Response.FromString,
                 )
 
 
@@ -60,18 +60,18 @@ def add_SLMServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'SetImage': grpc.stream_unary_rpc_method_handler(
                     servicer.SetImage,
-                    request_deserializer=slm__pb2.ImageData.FromString,
-                    response_serializer=slm__pb2.Response.SerializeToString,
+                    request_deserializer=rusty__slm_dot_slm__pb2.ImageData.FromString,
+                    response_serializer=rusty__slm_dot_slm__pb2.Response.SerializeToString,
             ),
             'SetScreen': grpc.unary_unary_rpc_method_handler(
                     servicer.SetScreen,
-                    request_deserializer=slm__pb2.Screen.FromString,
-                    response_serializer=slm__pb2.Response.SerializeToString,
+                    request_deserializer=rusty__slm_dot_slm__pb2.Screen.FromString,
+                    response_serializer=rusty__slm_dot_slm__pb2.Response.SerializeToString,
             ),
             'SetPosition': grpc.unary_unary_rpc_method_handler(
                     servicer.SetPosition,
-                    request_deserializer=slm__pb2.Position.FromString,
-                    response_serializer=slm__pb2.Response.SerializeToString,
+                    request_deserializer=rusty__slm_dot_slm__pb2.Position.FromString,
+                    response_serializer=rusty__slm_dot_slm__pb2.Response.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -95,8 +95,8 @@ class SLM(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.stream_unary(request_iterator, target, '/slm.SLM/SetImage',
-            slm__pb2.ImageData.SerializeToString,
-            slm__pb2.Response.FromString,
+            rusty__slm_dot_slm__pb2.ImageData.SerializeToString,
+            rusty__slm_dot_slm__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -112,8 +112,8 @@ class SLM(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/slm.SLM/SetScreen',
-            slm__pb2.Screen.SerializeToString,
-            slm__pb2.Response.FromString,
+            rusty__slm_dot_slm__pb2.Screen.SerializeToString,
+            rusty__slm_dot_slm__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -129,7 +129,7 @@ class SLM(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/slm.SLM/SetPosition',
-            slm__pb2.Position.SerializeToString,
-            slm__pb2.Response.FromString,
+            rusty__slm_dot_slm__pb2.Position.SerializeToString,
+            rusty__slm_dot_slm__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -1,6 +1,16 @@
 from rusty_slm import slm_pb2
 from rusty_slm import slm_pb2_grpc
+from subprocess import Popen
+from platform import system
+
 import grpc
+
+class SLMBinaryRunner:
+    def __init__(self, port: int | str, monitor: int = 0):
+        self.port = port
+        self.monitor = monitor
+        Popen([""])
+        
 
 class SLMController():
     def __init__(self, port, address = "localhost"):
