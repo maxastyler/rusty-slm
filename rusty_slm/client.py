@@ -1,9 +1,12 @@
+from importlib.resources import files
+from platform import system
+from subprocess import Popen
+from typing import Any
+
+import grpc
+
 from rusty_slm import slm_pb2
 from rusty_slm import slm_pb2_grpc
-from subprocess import Popen
-from platform import system
-from importlib.resources import files
-import grpc
 
 BINARY_NAMES = {
     "Linux": "rusty-slm-server-linux",
@@ -44,10 +47,14 @@ class SLMBinaryRunner:
 class SLMClient:
     """A client for the rusty SLM server"""
 
-    def __init__(self, port, address="localhost"):
+    def __init__(
+            self, port, address="localhost", channel_options: None | list[tuple[str, Any]] = None
+    ):
         self.address = address
         self.port = port
-        self.channel = grpc.insecure_channel(f"{self.address}:{self.port}")
+        self.channel = grpc.insecure_channel(
+            f"{self.address}:{self.port}", options=channel_options
+        )
         self.stub = slm_pb2_grpc.SLMStub(self.channel)
 
     def set_image(self, image):
@@ -84,6 +91,7 @@ class SLMClient:
 class SLM(SLMClient):
     """A class extending SLMClient, providing a server to run along with it"""
 
-    def __init__(self, port: int, monitor: int = 0, address="localhost"):
+    def __init__(self, port: int, monitor: int = 0, address="localhost",
+                 channel_options: None | list[tuple[str, Any]] = None):
         self.binary = SLMBinaryRunner(port, monitor)
-        super().__init__(port, address)
+        super().__init__(port, address, channel_options=channel_options)
