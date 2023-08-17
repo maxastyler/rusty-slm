@@ -1,0 +1,31 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Rusty-SLM
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Max
+    family-names: Tyler
+    email: max.tyler@st.com
+    affiliation: STMicroelectronics
+identifiers:
+  - type: url
+    value: >-
+      https://github.com/maxastyler/rusty-slm/releases/tag/v0.2.0
+    description: Release v0.2.0 of Rusty SLM
+repository-code: 'https://github.com/maxastyler/rusty-slm'
+abstract: >-
+  A program for controlling SLMs with rust and python. The
+  server is implemented in rust with grpc, allowing for
+  control from any programming language that can connect to
+  a web endpoint.
+keywords:
+  - software
+  - rust
+  - python
+  - SLM
+license: MIT
