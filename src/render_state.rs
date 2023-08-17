@@ -8,7 +8,7 @@ use crate::image::{ColourType, ImageData};
 use crate::texture;
 use crate::vertex::Vertex;
 
-pub struct State {
+pub struct RenderState {
     pub surface: wgpu::Surface,
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
@@ -24,13 +24,10 @@ pub struct State {
     pub image: ImageData,
 }
 
-impl State {
-    // Creating some of the wgpu types requires async code
+impl RenderState {
     pub async fn new(window: &Window) -> Result<Self> {
         let size = window.inner_size();
 
-        // The instance is a handle to our GPU
-        // BackendBit::PRIMARY => Vulkan + Metal + DX12 + Browser WebGPU
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
             dx12_shader_compiler: Default::default(),

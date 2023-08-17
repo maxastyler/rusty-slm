@@ -13,13 +13,13 @@ use winit::{
     window::{Fullscreen, Window, WindowBuilder},
 };
 
-use state::State;
+use render_state::RenderState;
 
 use crate::slm::slm_server::SlmServer;
 
 mod image;
+mod render_state;
 mod server;
-mod state;
 mod texture;
 mod vertex;
 
@@ -87,7 +87,7 @@ fn main() {
         );
     }
 
-    let mut state = block_on(State::new(&window)).unwrap();
+    let mut state = block_on(RenderState::new(&window)).unwrap();
     let (tx, mut rx) = mpsc::channel(100);
     let cloned_tx = tx.clone();
     let server = server::SlmService { tx };

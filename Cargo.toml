@@ -17,7 +17,6 @@ tonic = "0.9"
 prost = "0.11"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-rand = "0.8"
 tokio = { version = "1.32", features = ["full"] }
 bytemuck = { version = "1.5", features = ["derive"] }
 clap = "2.33"
