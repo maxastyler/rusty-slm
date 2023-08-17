@@ -1,11 +1,12 @@
+use futures_util::stream;
+use tonic::Request;
+
+use slm::{image_data::ImageOneof, image_description::ColourType, ImageData, ImageDescription};
+use slm::slm_client::SlmClient;
+
 pub mod slm {
     tonic::include_proto!("slm");
 }
-
-use futures_util::stream;
-use slm::slm_client::SlmClient;
-use slm::{image_data::ImageOneof, image_description::ColourType, ImageData, ImageDescription};
-use tonic::Request;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -21,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         ImageData {
             image_oneof: Some(ImageOneof::Data(vec![
-                255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 255, 0, 255
+                255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 255, 0, 255,
             ])),
         },
     ];

@@ -1,12 +1,13 @@
-use crate::image;
-use crate::slm::slm_server::{Slm, SlmServer};
-use crate::slm::{
-    image_data::ImageOneof, image_description::ColourType, EmptyParams, ImageDescription, Position,
-    Response, Screen,
-};
 use tokio::sync::mpsc;
 use tonic::{Request, Status, Streaming};
 use winit::monitor::MonitorHandle;
+
+use crate::image;
+use crate::slm::{
+    EmptyParams, image_data::ImageOneof, image_description::ColourType, ImageDescription, Position,
+    Response, Screen,
+};
+use crate::slm::slm_server::{Slm, SlmServer};
 
 #[derive(Debug)]
 pub struct SlmService {
@@ -39,10 +40,10 @@ impl Slm for SlmService {
         while let Some(data) = stream.message().await? {
             match data.image_oneof {
                 Some(ImageOneof::Description(ImageDescription {
-                    width,
-                    height,
-                    colour_type,
-                })) => {
+                                                 width,
+                                                 height,
+                                                 colour_type,
+                                             })) => {
                     image_data.size.0 = width;
                     image_data.size.1 = height;
                     image_data.colour_type = match colour_type {

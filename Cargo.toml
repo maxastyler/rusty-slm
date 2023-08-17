@@ -1,39 +1,32 @@
 [package]
 name = "rusty-slm"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Max Tyler <maxastyler@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-winit = "0.24.0"
-winit_input_helper = "0.9"
+winit = "0.28.0"
 log = "0.4"
-env_logger = "0.7"
+env_logger = "0.10"
 anyhow = "1.0"
-wgpu = "0.7"
-image = "0.23"
-# futures = "0.3"
-tonic = "0.4"
-prost = "0.7"
-futures-core = "0.3"
-futures-util = "0.3"
-futures = "0.3"
-async-stream = "0.3"
+wgpu = "0.17"
+image = "0.24"
+tonic = "0.9"
+prost = "0.11"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rand = "0.8"
-tokio = { version = "1.2", features = ["rt-multi-thread", "macros", "sync", "time"] }
-bytemuck = {version = "1.5", features = [ "derive" ]}
+tokio = { version = "1.32", features = ["full"] }
+bytemuck = { version = "1.5", features = ["derive"] }
 clap = "2.33"
+futures = "0.3"
+futures-util = "0.3"
 
 [build-dependencies]
-shaderc = "0.7"
 anyhow = "1.0"
-fs_extra = "1.2"
-glob = "0.3"
-tonic-build = "0.4"
+tonic-build = "0.9"
 
 [[bin]]
 name = "rusty-slm-client"

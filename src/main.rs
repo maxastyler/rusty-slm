@@ -1,8 +1,11 @@
-use clap::{App, Arg};
-use futures::executor::block_on;
 use std::net::{IpAddr, Ipv6Addr, SocketAddr};
 use std::thread;
+
+use clap::{App, Arg};
+use futures::executor::block_on;
 use tokio::sync::mpsc;
+use tonic::transport::Server;
+use winit::event_loop::EventLoopBuilder;
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop, EventLoopProxy},
@@ -10,18 +13,19 @@ use winit::{
     window::{Fullscreen, Window, WindowBuilder},
 };
 
+use state::State;
+
+use crate::slm::slm_server::SlmServer;
+
 mod image;
 mod server;
 mod state;
 mod texture;
 mod vertex;
+
 mod slm {
     tonic::include_proto!("slm");
 }
-
-use crate::slm::slm_server::SlmServer;
-use state::State;
-use tonic::transport::Server;
 
 const INDICES: &[u16] = &[0, 1, 2, 0, 2, 3];
 
@@ -62,7 +66,7 @@ fn main() {
 
     let port: u16 = matches.value_of("PORT").unwrap().parse().unwrap();
 
-    let event_loop: EventLoop<server::Message> = EventLoop::with_user_event();
+    let event_loop: EventLoop<server::Message> = EventLoopBuilder::with_user_event().build();
     let event_loop_proxy: EventLoopProxy<server::Message> = event_loop.create_proxy();
     let window = WindowBuilder::new()
         .with_title("SLM")
@@ -83,7 +87,7 @@ fn main() {
         );
     }
 
-    let mut state = block_on(State::new(&window));
+    let mut state = block_on(State::new(&window)).unwrap();
     let (tx, mut rx) = mpsc::channel(100);
     let cloned_tx = tx.clone();
     let server = server::SlmService { tx };
@@ -96,10 +100,11 @@ fn main() {
             .enable_all()
             .build()
             .unwrap()
-            .block_on(Server::builder().add_service(svc).serve(SocketAddr::new(
-                "::".parse().unwrap(),
-                port,
-            )));
+            .block_on(
+                Server::builder()
+                    .add_service(svc)
+                    .serve(SocketAddr::new("::".parse().unwrap(), port)),
+            );
         block_on(cloned_tx.send(server::Message::Quit));
     });
     // spawn the message thread
@@ -125,15 +130,14 @@ fn main() {
         }
         Event::UserEvent(server::Message::Quit) => *control_flow = ControlFlow::Exit,
         Event::RedrawRequested(_) => {
-            state.update();
             match state.render() {
                 Ok(_) => {}
                 // Recreate the swap_chain if lost
-                Err(wgpu::SwapChainError::Lost) => state.resize(state.size),
+                Err(wgpu::SurfaceError::Lost) => state.resize(state.size),
                 // The system is out of memory, we should probably quit
-                Err(wgpu::SwapChainError::OutOfMemory) => *control_flow = ControlFlow::Exit,
+                Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
                 // All other errors (Outdated, Timeout) should be resolved by the next frame
-                Err(_) => {}
+                Err(e) => eprintln!("Error: {:?}", e),
             }
         }
         Event::MainEventsCleared => {
