@@ -164,7 +164,7 @@ dependencies = [
  "http",
  "http-body",
  "hyper",
- "itoa 1.0.9",
+ "itoa",
  "matchit",
  "memchr",
  "mime",
@@ -939,7 +939,7 @@ checksum = "bd6effc99afb63425aff9b05836f029929e345a6148a14b7ecd5ab67af944482"
 dependencies = [
  "bytes",
  "fnv",
- "itoa 1.0.9",
+ "itoa",
 ]
 
 [[package]]
@@ -986,7 +986,7 @@ dependencies = [
  "http-body",
  "httparse",
  "httpdate",
- "itoa 1.0.9",
+ "itoa",
  "pin-project-lite",
  "socket2 0.4.9",
  "tokio",
@@ -1077,12 +1077,6 @@ checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
 dependencies = [
  "either",
 ]
-
-[[package]]
-name = "itoa"
-version = "0.4.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd25036021b0de88a0aff6b850051563c6516d0bf53f8638938edbb9de732736"
 
 [[package]]
 name = "itoa"
@@ -1898,7 +1892,7 @@ checksum = "7ffc183a10b4478d04cbbbfc96d0873219d962dd5accaff2ffbd4ceb7df837f4"
 
 [[package]]
 name = "rusty-slm"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1907,23 +1901,13 @@ dependencies = [
  "futures",
  "futures-util",
  "image",
- "log",
  "prost",
- "rand",
- "serde",
- "serde_json",
  "tokio",
  "tonic",
  "tonic-build",
  "wgpu",
  "winit",
 ]
-
-[[package]]
-name = "ryu"
-version = "1.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 
 [[package]]
 name = "scoped-tls"
@@ -1955,31 +1939,6 @@ name = "serde"
 version = "1.0.123"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92d5161132722baa40d802cc70b15262b98258453e85e5d1d365c757c73869ae"
-dependencies = [
- "serde_derive",
-]
-
-[[package]]
-name = "serde_derive"
-version = "1.0.123"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9391c295d64fc0abb2c556bad848f33cb8296276b1ad2677d1ae1ace4f258f31"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "serde_json"
-version = "1.0.64"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "799e97dc9fdae36a5c8b8f2cae9ce2ee9fdce2058c57a93e6099d919fd982f79"
-dependencies = [
- "itoa 0.4.7",
- "ryu",
- "serde",
-]
 
 [[package]]
 name = "signal-hook-registry"

@@ -1,6 +1,6 @@
 [package]
 name = "rusty-slm"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Max Tyler <maxastyler@gmail.com>"]
 edition = "2021"
 
@@ -8,17 +8,14 @@ edition = "2021"
 
 [dependencies]
 winit = "0.28.0"
-log = "0.4"
 env_logger = "0.10"
 anyhow = "1.0"
 wgpu = "0.17"
 image = "0.24"
 tonic = "0.9"
 prost = "0.11"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
 tokio = { version = "1.32", features = ["full"] }
-bytemuck = { version = "1.5", features = ["derive"] }
+bytemuck = { version = "1.13", features = ["derive"] }
 clap = "2.33"
 futures = "0.3"
 futures-util = "0.3"
